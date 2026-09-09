@@ -1,0 +1,24 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: registry 与目录结构一致
+        run: python3 tools/build-registry.py --check
+      - name: 每个 skill 的 SKILL.md 可解析
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            head -1 "$f" | grep -q '^---$' || { echo "❌ $f 首行不是 ---"; fail=1; }
+            grep -q '^name:' "$f" || { echo "❌ $f 缺少 name"; fail=1; }
+            grep -q '^description:' "$f" || { echo "❌ $f 缺少 description"; fail=1; }
+          done < <(find . -name SKILL.md -not -path './.git/*')
+          [ $fail -eq 0 ] && echo "✅ 全部 SKILL.md 合法"
+          exit $fail
+      - name: 脚本可执行
+        run: |
+          test -x tools/skill-repo.sh || { echo "❌ tools/skill-repo.sh 无执行位"; exit 1; }
+          bash -n tools/skill-repo.sh && echo "✅ 语法正确"

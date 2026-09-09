@@ -1,0 +1,104 @@
+name: Security Scan
+
+# 依赖漏洞扫描单独成 workflow，不挂在主 CI 上。
+#
+# 理由：NVD 数据库要下载数年的 CVE 数据，实测单次 20 分钟以上。挂在每次 push 上
+# 会让 CI 变成"提交后等二十分钟"——那样的 CI 人会开始绕过，卡口就白设了。
+# 而 CVE 数据本来就是天级更新，不需要每个 commit 重扫一遍。
+#
+# ADR-0008 要求"开启依赖漏洞扫描并纳入 CI"，本 workflow 即是它的落地：
+# Spring Boot 3.5 已 OSS EOL，没有官方补丁，CVE 只能靠自己发现。
+on:
+  schedule:
+    # 每周一 UTC 02:00
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 配置私服凭证
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'XML'
+          <settings>
+            <servers>
+              <server>
+                <id>__RELEASE_REPO_ID__</id>
+                <username>${env.MAVEN_REPO_USERNAME}</username>
+                <password>${env.MAVEN_REPO_PASSWORD}</password>
+              </server>
+            </servers>
+            <profiles>
+              <profile>
+                <id>rdc</id>
+                <repositories>
+                  <repository>
+                    <id>__RELEASE_REPO_ID__</id>
+                    <url>__RELEASE_REPO_URL__</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>rdc</activeProfile>
+            </activeProfiles>
+          </settings>
+          XML
+        env:
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      # 缓存 NVD 数据库，否则每次都要重下数年的 CVE 数据
+      - name: 缓存 NVD 数据库
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: nvd-${{ github.run_id }}
+          restore-keys: nvd-
+
+      - name: 依赖漏洞扫描
+        # 用 nvdApiKeyEnvironmentVariable 而不是 -DnvdApiKey：后者会把密钥
+        # 放进进程命令行（ps 可见、也可能被日志原样打印），前者只走环境变量。
+        #
+        # ⚠️ 插件里这三个参数是 if / else if / else，不是叠加（11.1.0 字节码确认）：
+        #   1. nvdApiKeyEnvironmentVariable != null → 从环境变量读
+        #   2. else nvdApiServerId != null          → 从 settings.xml 的 <server> 读
+        #   3. else                                  → 才用 -DnvdApiKey
+        # 所以若将来有人配了 nvdApiServerId，这里的设置会被静默忽略，
+        # 症状是"配了 key 但依然极慢"且不报任何错。
+        #
+        # ossIndexWarnOnlyOnRemoteErrors：OSS Index（Sonatype）是独立于 NVD 的
+        # 第二个数据源，对匿名请求按 IP 限流，而 GitHub Actions 出口 IP 是全球
+        # 共用的——实测必被 401。让它降级为警告而不是让整轮扫描失败。
+        #
+        # ⚠️ 这不是"忽略漏洞"：NVD 仍然全量跑，它才是 CVE 的主数据源。
+        # OSS Index 只是补充。若哪天想要它的完整结果，去 ossindex.sonatype.org
+        # 注册免费账号，在 settings.xml 加 <server> 并用 -DossIndexServerId 指定。
+        run: >
+          mvn -B dependency-check:check
+          -DnvdApiKeyEnvironmentVariable=NVD_API_KEY
+          -DossIndexWarnOnlyOnRemoteErrors=true
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      - name: 上传报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: '**/target/dependency-check-report.html'
+          if-no-files-found: ignore

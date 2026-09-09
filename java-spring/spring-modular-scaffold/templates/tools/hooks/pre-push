@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# push 前跑三个 shell 卡口。
+#
+# ⚠️ 这是 branch protection 的**弱替代**，不是等价物：
+#   - 可以被 `git push --no-verify` 一键绕过
+#   - 只在本机生效，别人的机器上不存在
+#   - 不跑测试（那要一分钟，每次 push 都等会被人自己关掉）
+#
+# 真正的卡口是 CI。私有仓库要启用 branch protection 需要 GitHub Pro；
+# 在那之前，CI 只能"报告"而不能"拦截"。
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+echo "── pre-push: 三个卡口"
+./tools/docs-index.sh --check
+./tools/module-graph.sh --check
+./tools/check-migrations.sh
+echo "── 通过。测试未跑（交给 CI），如需本地全量：mvn test"

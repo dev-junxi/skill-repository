@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- @if standalone_parent -->
+    <parent>
+        <groupId>__GROUP_ID__</groupId>
+        <artifactId>__ARTIFACT_PREFIX__-parent</artifactId>
+        <version>1.0.2</version>
+        <!-- 留空是关键：强制从仓库解析 parent，而不是找上级目录 -->
+        <relativePath/>
+    </parent>
+    <!-- @endif -->
+    <!-- @if monorepo_parent -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.16</version>
+        <relativePath/>
+    </parent>
+    <!-- @endif -->
+
+    <!-- 必须显式声明：monorepo 模式下 parent 是 spring-boot-starter-parent，
+         不声明就会继承成 org.springframework.boot，子模块的 parent 坐标全部对不上 -->
+    <groupId>__GROUP_ID__</groupId>
+    <artifactId>__PROJECT_NAME__</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>__PROJECT_NAME__</name>
+
+    <!-- @if monorepo_parent -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+
+        <mybatis-plus.version>3.5.17</mybatis-plus.version>
+        <sa-token.version>1.46.0</sa-token.version>
+        <springdoc.version>2.7.0</springdoc.version>
+        <!-- @if dao -->
+        <!-- ⚠️ 私有 artifact，只被 dao-starter 使用（见下方 dependencyManagement 的说明）。
+             不选持久层时可以整条删掉。 -->
+        <model-view-builder.version>1.0.1</model-view-builder.version>
+        <!-- @endif -->
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <archunit.version>1.3.0</archunit.version>
+        <shedlock.version>5.16.0</shedlock.version>
+        <guava.version>33.4.0-jre</guava.version>
+        <hutool.version>5.8.35</hutool.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <reflections.version>0.10.2</reflections.version>
+
+        <spotless.version>2.44.0</spotless.version>
+        <dependency-check.version>11.1.0</dependency-check.version>
+    </properties>
+    <!-- @endif -->
+
+    <modules>
+        <module>components/__ARTIFACT_PREFIX__-contract</module>
+        <module>components/__ARTIFACT_PREFIX__-web-spring-boot-starter</module>
+        <!-- @if auth -->
+        <module>components/__ARTIFACT_PREFIX__-auth-spring-boot-starter</module>
+        <!-- @endif -->
+        <!-- @if dao -->
+        <module>components/__ARTIFACT_PREFIX__-dao-spring-boot-starter</module>
+        <!-- @endif -->
+        <module>server/__ARTIFACT_PREFIX__-app</module>
+        <module>tools/__ARTIFACT_PREFIX__-archunit</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>__GROUP_ID__</groupId>
+                <artifactId>__ARTIFACT_PREFIX__-contract</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>__GROUP_ID__</groupId>
+                <artifactId>__ARTIFACT_PREFIX__-web-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- @if auth -->
+            <dependency>
+                <groupId>__GROUP_ID__</groupId>
+                <artifactId>__ARTIFACT_PREFIX__-auth-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- @endif -->
+            <!-- @if dao -->
+            <dependency>
+                <groupId>__GROUP_ID__</groupId>
+                <artifactId>__ARTIFACT_PREFIX__-dao-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- @endif -->
+            <!-- @if monorepo_parent -->
+            <!-- 持久层 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- 鉴权（仅允许 auth 组件与 auth 模块引用，见 ADR-0009 / ArchUnit R11） -->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-spring-boot3-starter</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-jwt</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+
+            <!-- API 文档 -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+        <!-- @if dao -->
+            <!-- ⚠️ 私有 artifact：groupId 恒为 com.lumos，与本项目的 groupId 无关
+                 （它是一个跨项目共享的私有库，不是本项目的产物）。
+
+                 dao-starter 对它是**结构性依赖**——BaseDaoImpl 的泛型约束用了它的
+                 HasKey，BaseService 的 buildView 系列也依赖它。拉不到这个 artifact
+                 的机器上 dao-starter 会构建失败。
+
+                 不选持久层（OPT_DAO=no）时本条可以整条删掉。 -->
+            <dependency>
+                <groupId>com.lumos</groupId>
+                <artifactId>model-view-builder</artifactId>
+                <version>${model-view-builder.version}</version>
+            </dependency>
+        <!-- @endif -->
+
+            <!-- 对象映射 -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- 分布式调度锁（全局唯一任务用，见 ADR-0012） -->
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-spring</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-provider-jdbc-template</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+
+            <!-- 架构约束测试 -->
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- 工具 -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+            <!-- @endif -->
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <!-- @if monorepo_parent -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                    <configuration>
+                        <java>
+                            <palantirJavaFormat/>
+                            <removeUnusedImports/>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </java>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${dependency-check.version}</version>
+                    <configuration>
+                        <failBuildOnCVSS>7</failBuildOnCVSS>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals><goal>jar</goal></goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <!-- @endif -->
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # @if dao
+          # check-migrations.sh 要查 git log --all 找跨分支撞号，
+          # 浅克隆会漏报，卡口会变成摆设
+          # @endif
+          # 全量克隆：让依赖 git 历史的卡口能正常工作
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # 私服上的 artifact（__ARTIFACT_PREFIX__-parent、以及选了持久层时的私有库）
+      # runner 需要凭证才能拉取。
+      # 两个 secret 需在仓库 Settings > Secrets and variables > Actions 里配置：
+      #   MAVEN_REPO_USERNAME / MAVEN_REPO_PASSWORD
+      - name: 配置私服凭证
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'XML'
+          <settings>
+            <servers>
+              <server>
+                <id>__RELEASE_REPO_ID__</id>
+                <username>${env.MAVEN_REPO_USERNAME}</username>
+                <password>${env.MAVEN_REPO_PASSWORD}</password>
+              </server>
+            </servers>
+            <profiles>
+              <profile>
+                <id>rdc</id>
+                <repositories>
+                  <repository>
+                    <id>__RELEASE_REPO_ID__</id>
+                    <url>__RELEASE_REPO_URL__</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>rdc</activeProfile>
+            </activeProfiles>
+          </settings>
+          XML
+        env:
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      - name: 代码风格
+        run: mvn -B spotless:check
+        env:
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      - name: 测试（单元 + ArchUnit + Testcontainers 集成）
+        run: mvn -B test
+        env:
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      - name: 文档索引卡口
+        run: ./tools/docs-index.sh --check
+
+      - name: 跨模块依赖快照卡口
+        run: ./tools/module-graph.sh --check
+
+      # @if dao
+      - name: 迁移版本号卡口
+        run: ./tools/check-migrations.sh
+      # @endif

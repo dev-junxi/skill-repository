@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>__GROUP_ID__</groupId>
+        <artifactId>__PROJECT_NAME__</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>__ARTIFACT_PREFIX__-archunit</artifactId>
+    <name>__ARTIFACT_PREFIX__-archunit</name>
+    <description>架构约束测试。test-only，不产出生产代码</description>
+
+    <dependencies>
+        <!-- ⚠️ 每新增一个 module 必须加进这里，否则 ArchUnit 扫不到它，规则形同虚设 -->
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-contract</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-web-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- @if auth -->
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-auth-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- @endif -->
+        <!-- @if dao -->
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-dao-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- @endif -->
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-app</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- fixture 需要这些依赖来"故意违规" -->
+        <!-- @if dao -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- @endif -->
+        <!-- @if auth -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- @endif -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

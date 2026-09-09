@@ -1,0 +1,11 @@
+always:ADR-0001-single-database-per-process.md
+always:ADR-0002-cross-module-via-api-module.md
+always:ADR-0004-spring-mvc-with-virtual-threads.md
+always:ADR-0006-centralized-request-logging.md
+always:ADR-0010-jackson-over-fastjson.md
+always:ADR-0011-stateless-app-for-multi-instance.md
+always:ADR-0013-domain-event-without-application-event.md
+auth:ADR-0007-user-info-in-token.md
+auth:ADR-0009-sa-token-stateless-confined.md
+dao:ADR-0003-mybatis-plus-with-pure-domain.md
+dao:ADR-0012-scheduling-two-categories.md

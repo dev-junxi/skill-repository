@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>__GROUP_ID__</groupId>
+        <artifactId>__PROJECT_NAME__</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>__ARTIFACT_PREFIX__-__PRIVATE_NAME__-spring-boot-starter</artifactId>
+    <name>__ARTIFACT_PREFIX__-__PRIVATE_NAME__-spring-boot-starter</name>
+    <description>私有组件 __PRIVATE_ARTIFACT__ 的 Spring 装配层</description>
+
+    <dependencies>
+        <!-- ⚠️ 私有 artifact：只存在于你的私服上。
+             拉不到它的机器上本模块会构建失败（CI、新同事的机器、开源化之后）。 -->
+        <dependency>
+            <groupId>__PRIVATE_GROUP__</groupId>
+            <artifactId>__PRIVATE_ARTIFACT__</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>__GROUP_ID__</groupId>
+            <artifactId>__ARTIFACT_PREFIX__-contract</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
