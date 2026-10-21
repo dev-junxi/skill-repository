@@ -1,113 +1,18 @@
 {
   "version": "1.0",
   "repo": "dev-junxi/skill-repository",
-  "updated": "2026-09-09",
-  "total": 1,
+  "updated": "2026-10-22",
+  "total": 2,
   "categories": {
-    "ai-agent": {
-      "label": "AI / Agent 工程",
-      "emoji": "🤖",
-      "count": 0
-    },
-    "database": {
-      "label": "数据库",
-      "emoji": "🗄️",
-      "count": 0
-    },
-    "python-django": {
-      "label": "Python / Django",
-      "emoji": "🐍",
-      "count": 0
-    },
     "java-spring": {
       "label": "Java / Spring Boot",
       "emoji": "☕",
       "count": 1
     },
-    "rust": {
-      "label": "Rust",
-      "emoji": "🦀",
-      "count": 0
-    },
-    "kotlin-android": {
-      "label": "Kotlin / Android",
-      "emoji": "📱",
-      "count": 0
-    },
-    "swift-ios": {
-      "label": "Swift / iOS",
-      "emoji": "🍎",
-      "count": 0
-    },
-    "php-laravel": {
-      "label": "PHP / Laravel / Perl",
-      "emoji": "🐘",
-      "count": 0
-    },
-    "cpp-csharp-go": {
-      "label": "C++ / C# / .NET / Go",
-      "emoji": "⚙️",
-      "count": 0
-    },
-    "frontend-ui": {
-      "label": "前端 / UI",
-      "emoji": "🌐",
-      "count": 0
-    },
-    "design-brand": {
-      "label": "设计 / 品牌",
-      "emoji": "🎨",
-      "count": 0
-    },
-    "security": {
-      "label": "安全",
-      "emoji": "🔒",
-      "count": 0
-    },
     "testing-quality": {
       "label": "测试 / 质量",
       "emoji": "🧪",
-      "count": 0
-    },
-    "devops-tooling": {
-      "label": "工程工具 / DevOps",
-      "emoji": "🔧",
-      "count": 0
-    },
-    "knowledge-docs": {
-      "label": "知识管理 / 文档",
-      "emoji": "📚",
-      "count": 0
-    },
-    "business-ops": {
-      "label": "商业 / 业务运营",
-      "emoji": "💼",
-      "count": 0
-    },
-    "content-marketing": {
-      "label": "内容 / 营销",
-      "emoji": "📣",
-      "count": 0
-    },
-    "integrations-mcp": {
-      "label": "外部集成 / MCP",
-      "emoji": "🔗",
-      "count": 0
-    },
-    "web3-defi": {
-      "label": "Web3 / DeFi",
-      "emoji": "🔷",
-      "count": 0
-    },
-    "lumos": {
-      "label": "Lumos 项目专属",
-      "emoji": "🌟",
-      "count": 0
-    },
-    "creative": {
-      "label": "创意 / Creative",
-      "emoji": "✨",
-      "count": 0
+      "count": 1
     }
   },
   "skills": [
@@ -116,6 +21,13 @@
       "description": "Use when starting a new Spring Boot service and you want a modular architecture whose boundaries are enforced by the build rather than by convention — generates a buildable skeleton with layered modules, ArchUnit rules, documentation guards, and ADRs, with options for auth / persistence / parent distribution.",
       "category": "java-spring",
       "path": "java-spring/spring-modular-scaffold",
+      "origin": "custom"
+    },
+    {
+      "name": "module-acceptance-testing",
+      "description": "为业务模块或服务客户端设计、实现、运行和复测可追溯的验收测试，产出P0/P1/P2用例、请求响应证据、分级报告及测试资源清理记录。用于“给这个模块写验收用例”“按记忆模块方式测试其他模块”“一键跑用例并生成报告”等请求；普通局部单元测试无需套用整套执行器。",
+      "category": "testing-quality",
+      "path": "testing-quality/module-acceptance-testing",
       "origin": "custom"
     }
   ]
