@@ -1,23 +1,10 @@
 {
-  "ai-agent":          { "label": "AI / Agent 工程",        "emoji": "🤖" },
-  "database":          { "label": "数据库",                  "emoji": "🗄️" },
-  "python-django":     { "label": "Python / Django",        "emoji": "🐍" },
-  "java-spring":       { "label": "Java / Spring Boot",     "emoji": "☕" },
-  "rust":              { "label": "Rust",                    "emoji": "🦀" },
-  "kotlin-android":    { "label": "Kotlin / Android",       "emoji": "📱" },
-  "swift-ios":         { "label": "Swift / iOS",            "emoji": "🍎" },
-  "php-laravel":       { "label": "PHP / Laravel / Perl",   "emoji": "🐘" },
-  "cpp-csharp-go":     { "label": "C++ / C# / .NET / Go",   "emoji": "⚙️" },
-  "frontend-ui":       { "label": "前端 / UI",               "emoji": "🌐" },
-  "design-brand":      { "label": "设计 / 品牌",             "emoji": "🎨" },
-  "security":          { "label": "安全",                    "emoji": "🔒" },
-  "testing-quality":   { "label": "测试 / 质量",             "emoji": "🧪" },
-  "devops-tooling":    { "label": "工程工具 / DevOps",       "emoji": "🔧" },
-  "knowledge-docs":    { "label": "知识管理 / 文档",         "emoji": "📚" },
-  "business-ops":      { "label": "商业 / 业务运营",         "emoji": "💼" },
-  "content-marketing": { "label": "内容 / 营销",             "emoji": "📣" },
-  "integrations-mcp":  { "label": "外部集成 / MCP",          "emoji": "🔗" },
-  "web3-defi":         { "label": "Web3 / DeFi",            "emoji": "🔷" },
-  "lumos":             { "label": "Lumos 项目专属",          "emoji": "🌟" },
-  "creative":          { "label": "创意 / Creative",         "emoji": "✨" }
+  "java-spring": {
+    "label": "Java / Spring Boot",
+    "emoji": "☕"
+  },
+  "testing-quality": {
+    "label": "测试 / 质量",
+    "emoji": "🧪"
+  }
 }

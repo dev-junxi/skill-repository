@@ -1,0 +1,4 @@
+interface:
+  display_name: "模块验收测试"
+  short_description: "为不同模块复用分级验收用例、证据报告、隔离清理与失败复测流程"
+  default_prompt: "使用 $module-acceptance-testing，为指定模块设计并实现可独立运行的验收测试，输出分级报告、调用证据和资源清理结果。"
