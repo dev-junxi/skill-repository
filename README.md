@@ -54,3 +54,9 @@ python3 tools/build-registry.py --check
 CI 会跑这条。它同时检查：每个 skill 有 `SKILL.md`、frontmatter 有 `description`、
 目录名与 `name` 一致、没有游离在 `categories.json` 之外的目录（那样的目录下
 skill 永远不会被收录，是静默失效）。
+
+## 开源skill
+
+ponytail：https://github.com/DietrichGebert/ponytail
+superpowers：https://github.com/obra/superpowers
+
